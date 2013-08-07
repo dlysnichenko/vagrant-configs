@@ -47,28 +47,31 @@ gem update --system
 gem install bundler
 
 # Install ssh pubkey
-su - vagrant mkdir .ssh; chmod 755 .ssh; wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub ; cat vagrant.pub > .ssh/authorized_keys ; chmod 644 .ssh/authorized_keys 
+su - vagrant -c "mkdir .ssh; chmod 755 .ssh; wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub ; cat vagrant.pub > .ssh/authorized_keys ; chmod 644 .ssh/authorized_keys"
 
-# ? ifconfig?
-sudo /sbin/ifconfig
-echo "write down MAC address of eth0"
+# Configure networking
 
-shutdown -h now
+for NO in {0..9} 
+do
+  echo -e "DEVICE=eth$NO\nBOOTPROTO=dhcp\nONBOOT=yes" > /etc/sysconfig/network-scripts/ifcfg-eth$NO
+done
+echo "" > /etc/udev/rules.d/70-persistent-net.rules
 
-# Не потрібне?
-# install from EPEL
-#yum --enablerepo=epel -y install libyaml libyaml-devel readline-devel ncurses-devel gdbm-devel tcl-devel openssl-devel db4-devel libffi-devel
+# Install VBox utils
+rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+yum install gcc kernel-devel kernel-headers dkms make bzip2 -y
 
-#mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS} 
-#wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p385.tar.gz -P rpmbuild/SOURCES 
-#wget https://raw.github.com/imeyer/ruby-1.9.3-rpm/master/ruby19.spec -P rpmbuild/SPECS 
-#rpmbuild -bb rpmbuild/SPECS/ruby19.spec 
-#rpm -Uvh rpmbuild/RPMS/x86_64/ruby-1.9.3p385-1.el6.x86_64.rpm 
- 
+## Current running kernel on Fedora, CentOS 6 and Red Hat (RHEL) 6 ##
+KERN_DIR=/usr/src/kernels/`uname -r`
 
+## Current running kernel on CentOS 5 and Red Hat (RHEL) 5 ##
+#KERN_DIR=/usr/src/kernels/`uname -r`-`uname -m`
 
-#yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel openssh-server openssh-clients
+export KERN_DIR
 
-#chkconfig sshd on
-#service sshd start
+mkdir /media/VirtualBoxGuestAdditions
+mount -r /dev/cdrom /media/VirtualBoxGuestAdditions
+cd /media/VirtualBoxGuestAdditions
+sh ./VBoxLinuxAdditions.run
+
 
