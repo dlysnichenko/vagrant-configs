@@ -9,6 +9,8 @@ else
   SRC_NAME=$1
   TGT_NAME=$2
 
+  vagrant box remove "$TGT_NAME"
+
   vagrant package --base "$SRC_NAME"
   vagrant box add "$TGT_NAME" package.box
   rm package.box

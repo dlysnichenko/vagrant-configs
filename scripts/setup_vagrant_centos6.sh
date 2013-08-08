@@ -1,4 +1,7 @@
 #!/bin/bash
+
+read -p "Insert VBox guest additions CD..."
+
 groupadd admin
 useradd -G admin vagrant
 echo vagrant | passwd vagrant --stdin
@@ -7,6 +10,13 @@ yum install ntp -y
 service ntpd start
 
 yum install sudo wget openssh-server openssh-clients  -y
+
+SUDOERS_FILE="/etc/sudoers"
+SUDOERS_RMPNEW="$SUDOERS_FILE.rpmnew"
+if [ -f $SUDOERS_RMPNEW ];
+then
+  mv $SUDOERS_RMPNEW $SUDOERS_FILE
+fi 
 
 chkconfig sshd on
 service sshd start
@@ -18,8 +28,8 @@ Defaults    env_keep="SSH_AUTH_SOCK"
 %admin ALL=NOPASSWD: ALL
 EOF
 
-sed -i 's/Defaults   !visiblepw/#Defaults   !visiblepw/g' /etc/sudoers
-sed -i 's/Defaults   requiretty/#Defaults   requiretty/g' /etc/sudoers
+sed -ri 's/(Defaults.*!visiblepw)/#\1/g' /etc/sudoers
+sed -ri 's/(Defaults.*requiretty)/#\1/g' /etc/sudoers
 
 su - vagrant echo 'export PATH=$PATH:/usr/sbin:/sbin' >> .bashrc
 
